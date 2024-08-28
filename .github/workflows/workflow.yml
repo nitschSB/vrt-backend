@@ -8,10 +8,10 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js environment
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
 
@@ -21,11 +21,14 @@ jobs:
       - name: Static analysis
         run: npm run lint
 
+      - name: Check formatting
+        run: npm run format:check
+
       - name: Unit tests
         run: npm run test:cov
 
       - name: Build and run containers
-        run: docker-compose up --build -d
+        run: docker compose up --build -d
 
       - name: Run acceptance tests
         run: npm run test:acceptance
@@ -35,10 +38,30 @@ jobs:
 
       - name: Stop containers
         if: always()
-        run: docker-compose down
+        run: docker compose down
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
+
+  test-migrations:
+    # See: https://github.com/Visual-Regression-Tracker/backend/issues/273
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install npm dependencies
+        working-directory: prisma
+        run: npm ci
+
+      - name: Static analysis
+        working-directory: prisma
+        run: npm run test
