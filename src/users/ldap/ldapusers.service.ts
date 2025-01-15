@@ -91,7 +91,7 @@ export class LdapUsersService implements Users {
       firstName: ldapEntry[this.ldapConfig.attributeFirstName].toString(),
       lastName: ldapEntry[this.ldapConfig.attributeLastName].toString(),
       apiKey: this.authService.generateApiKey(),
-      password: await this.authService.encryptPassword(Math.random().toString(36).slice(-8)),
+      password: await this.authService.encryptPassword(crypto.randomUUID().slice(-8)),
       role: Role.editor,
     };
 
